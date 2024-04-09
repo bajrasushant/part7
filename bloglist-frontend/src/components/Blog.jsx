@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import blogService from "../services/blogs";
+import { setNotification } from "../reducers/notificationReducer";
 // import PropTypes from "prop-types";
 
-const Blog = ({ blog, editBlog, deleteBlog, signedInUser }) => {
+const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
   const [visible, setVisible] = useState(false);
   const [hideOrView, setHideOrView] = useState("view");
   const [blogObject, setBlogObject] = useState(blog);
@@ -61,6 +64,63 @@ const Blog = ({ blog, editBlog, deleteBlog, signedInUser }) => {
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+const Blog = ({ signedInUser }) => {
+  const updateBlog = async (updatedBlog) => {
+    try {
+      await blogService.edit(updatedBlog);
+      setBlogs(
+        blogs
+          .map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
+          .sort((a, b) => b.likes - a.likes),
+      );
+      dispatch(
+        setNotification({
+          message: `Blog ${updatedBlog.title} was successfully updated`,
+          status: "success",
+        }),
+      );
+    } catch (e) {
+      dispatch(
+        setNotification({ message: "Couldn't update blog", status: "error" }),
+      );
+    }
+  };
+
+  const deleteBlog = async (blogToDelete) => {
+    try {
+      await blogService.deleteBlog(blogToDelete.id);
+      setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
+      dispatch(
+        setNotification({
+          message: `${blogToDelete.title} successfully deleted`,
+          status: "success",
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        setNotification({ message: "Couldn't delete blog", status: "error" }),
+      );
+    }
+  };
+  const dispatch = useDispatch();
+  const blogs = useSelector((state) => state.blogs);
+  return (
+    <div>
+      {[...blogs]
+        .sort((a, b) => b.likes - a.likes)
+        .map((blog) => (
+          <Blogs
+            key={blog.id}
+            blog={blog}
+            signedInUser={signedInUser}
+            editBlog={updateBlog}
+            deleteBlog={deleteBlog}
+          />
+        ))}
     </div>
   );
 };

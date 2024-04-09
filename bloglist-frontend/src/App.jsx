@@ -6,21 +6,24 @@ import NewBlogForm from "./components/NewBlogForm";
 import Notification from "./components/Notification";
 import { setNotification } from "./reducers/notificationReducer";
 import { useDispatch } from "react-redux";
+import { createBlog, initializeBlogs } from "./reducers/blogReducer";
 
 const App = () => {
   const dispatch = useDispatch();
-  const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState(null);
   const [newBlogFormVisible, setNewBlogFormVisible] = useState(false);
 
   useEffect(() => {
     if (user) {
-      blogService
-        .getAll()
-        .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)));
+      // blogService
+      //   .getAll()
+      //   .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)));
+      dispatch(initializeBlogs());
+      // .then((blogs) =>
+      // setBlogs(blogs.sort((a, b) => b.likes - a.likes)),
+      // );
     }
   }, [user]);
 
@@ -74,11 +77,10 @@ const App = () => {
 
   const addBlog = async (blogObject) => {
     try {
-      const blog = await blogService.create(blogObject);
-      blogService.getAll().then((blogs) => setBlogs(blogs));
+      dispatch(createBlog(blogObject));
       dispatch(
         setNotification({
-          message: `a new blog ${blog.title} by ${blog.author} added`,
+          message: `a new blog ${blogObject.title} by ${blogObject.author} added`,
           status: "success",
         }),
       );
@@ -118,82 +120,6 @@ const App = () => {
     );
   };
 
-  const updateBlog = async (updatedBlog) => {
-    try {
-      await blogService.edit(updatedBlog);
-      setBlogs(
-        blogs
-          .map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
-          .sort((a, b) => b.likes - a.likes),
-      );
-      dispatch(
-        setNotification({
-          message: `Blog ${updatedBlog.title} was successfully updated`,
-          status: "success",
-        }),
-      );
-      // setMessage({
-      //   message: `Blog ${updatedBlog.title} was successfully updated`,
-      //   status: "success",
-      // });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
-    } catch (e) {
-      dispatch(
-        setNotification({ message: "Couldn't update blog", status: "error" }),
-      );
-      // setMessage({ message: "Couldn't update blog", status: "error" });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
-    }
-  };
-
-  const deleteBlog = async (blogToDelete) => {
-    try {
-      await blogService.deleteBlog(blogToDelete.id);
-      setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
-      dispatch(
-        setNotification({
-          message: `${blogToDelete.title} successfully deleted`,
-          status: "success",
-        }),
-      );
-      // setMessage({
-      //   message: `${blogToDelete.title} successfully deleted`,
-      //   status: "success",
-      // });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
-    } catch (error) {
-      dispatch(
-        setNotification({ message: "Couldn't delete blog", status: "error" }),
-      );
-      // setMessage({ message: "Couldn't delete blog", status: "error" });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
-    }
-  };
-
-  const blogsComp = () => {
-    return (
-      <div>
-        {blogs.map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            editBlog={updateBlog}
-            deleteBlog={deleteBlog}
-            signedInUser={user}
-          />
-        ))}
-      </div>
-    );
-  };
-
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <h2>login to the application</h2>
@@ -225,7 +151,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={message} />
+      <Notification />
       {user === null && loginForm()}
       {user !== null && (
         <div>
@@ -235,7 +161,7 @@ const App = () => {
             <button onClick={() => handleLogout()}>logout</button>
           </p>
           {newBlogForm()}
-          {blogsComp()}
+          <Blog signedInUser={user} />
         </div>
       )}
     </div>
