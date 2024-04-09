@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import blogService from "../services/blogs";
 import { setNotification } from "../reducers/notificationReducer";
+import { removeBlogs, likeBlogs } from "../reducers/blogReducer";
 // import PropTypes from "prop-types";
 
 const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
@@ -56,8 +56,8 @@ const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
               like
             </button>
           </div>
-          <div className="blogUsername">{blog.user.username}</div>
-          {signedInUser.username === blog.user.username && (
+          <div className="blogUsername">{blog.user?.username}</div>
+          {signedInUser.username === blog.user?.username && (
             <button className="delete-button" onClick={removeBlog}>
               remove
             </button>
@@ -69,14 +69,12 @@ const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
 };
 
 const Blog = ({ signedInUser }) => {
+  const dispatch = useDispatch();
+  const blogs = useSelector((state) => state.blogs);
+
   const updateBlog = async (updatedBlog) => {
     try {
-      await blogService.edit(updatedBlog);
-      setBlogs(
-        blogs
-          .map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
-          .sort((a, b) => b.likes - a.likes),
-      );
+      dispatch(likeBlogs(updatedBlog));
       dispatch(
         setNotification({
           message: `Blog ${updatedBlog.title} was successfully updated`,
@@ -92,8 +90,7 @@ const Blog = ({ signedInUser }) => {
 
   const deleteBlog = async (blogToDelete) => {
     try {
-      await blogService.deleteBlog(blogToDelete.id);
-      setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
+      dispatch(removeBlogs(blogToDelete.id));
       dispatch(
         setNotification({
           message: `${blogToDelete.title} successfully deleted`,
@@ -106,8 +103,6 @@ const Blog = ({ signedInUser }) => {
       );
     }
   };
-  const dispatch = useDispatch();
-  const blogs = useSelector((state) => state.blogs);
   return (
     <div>
       {[...blogs]

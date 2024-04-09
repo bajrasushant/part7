@@ -17,13 +17,7 @@ const App = () => {
 
   useEffect(() => {
     if (user) {
-      // blogService
-      //   .getAll()
-      //   .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)));
       dispatch(initializeBlogs());
-      // .then((blogs) =>
-      // setBlogs(blogs.sort((a, b) => b.likes - a.likes)),
-      // );
     }
   }, [user]);
 
@@ -46,17 +40,12 @@ const App = () => {
       setUsername("");
       setPassword("");
     } catch {
-      // setMessage({ message: "wrong credentials, try again", status: "error" });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
       dispatch(
         setNotification({
           message: "wrong credentials, try again",
           status: "error",
         }),
       );
-      // setNotification({message: `
     }
   };
 
@@ -68,10 +57,6 @@ const App = () => {
       dispatch(
         setNotification({ message: "something went wrong", status: "error" }),
       );
-      // setMessage({ message: "something went wrong", status: "error" });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
     }
   };
 
@@ -84,21 +69,10 @@ const App = () => {
           status: "success",
         }),
       );
-      // setMessage({
-      //   message: `a new blog ${blog.title} by ${blog.author} added`,
-      //   status: "success",
-      // });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
     } catch (error) {
       dispatch(
         setNotification({ message: "Something went wrong", status: "error" }),
       );
-      // setMessage({ message: "Something went wrong", status: "error" });
-      // setTimeout(() => {
-      //   setMessage(null);
-      // }, 5000);
     } finally {
       setNewBlogFormVisible(false);
     }
