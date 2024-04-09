@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import Blog from "./components/Blog";
-import blogService from "./services/blogs";
-import loginService from "./services/login";
 import NewBlogForm from "./components/NewBlogForm";
 import Notification from "./components/Notification";
+import LoginForm from "./components/LoginForm";
+
 import { setNotification } from "./reducers/notificationReducer";
-import { useDispatch } from "react-redux";
+import { setUser } from "./reducers/userReducer";
 import { createBlog, initializeBlogs } from "./reducers/blogReducer";
 
 const App = () => {
   const dispatch = useDispatch();
-  const [user, setUser] = useState(null);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const user = useSelector((state) => state.user);
   const [newBlogFormVisible, setNewBlogFormVisible] = useState(false);
 
   useEffect(() => {
@@ -25,34 +25,15 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem("loggedUser");
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
+      dispatch(setUser(user));
     }
   }, []);
-
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    try {
-      const user = await loginService.login({ username, password });
-      window.localStorage.setItem("loggedUser", JSON.stringify(user));
-      blogService.setToken(user.token);
-      setUser(user);
-      setUsername("");
-      setPassword("");
-    } catch {
-      dispatch(
-        setNotification({
-          message: "wrong credentials, try again",
-          status: "error",
-        }),
-      );
-    }
-  };
 
   const handleLogout = () => {
     try {
       window.localStorage.removeItem("loggedUser");
       window.location.reload();
+      dispatch(setUser(null));
     } catch {
       dispatch(
         setNotification({ message: "something went wrong", status: "error" }),
@@ -94,39 +75,10 @@ const App = () => {
     );
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <h2>login to the application</h2>
-      <div>
-        username
-        <input
-          id="username"
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          id="password"
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button id="login-button" type="submit">
-        login
-      </button>
-    </form>
-  );
-
   return (
     <div>
       <Notification />
-      {user === null && loginForm()}
+      {user === null && <LoginForm />}
       {user !== null && (
         <div>
           <h1>blogs</h1>
