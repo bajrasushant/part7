@@ -60,7 +60,7 @@ const App = () => {
     }
   };
 
-  const addBlog = async (blogObject) => {
+  const addBlog = (blogObject) => {
     try {
       dispatch(createBlog(blogObject));
       dispatch(
