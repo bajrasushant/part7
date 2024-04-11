@@ -4,30 +4,22 @@ import blogService from "./services/blogs";
 import loginService from "./services/login";
 import NewBlogForm from "./components/NewBlogForm";
 import Notification from "./components/Notification";
-import { useNotifyDispatch } from "./NotificationContext";
+import { useNotify } from "./hooks";
 
 const App = () => {
-  const notifyDispatch = useNotifyDispatch();
-  const notify = (payload) => {
-    notifyDispatch({ type: "SET", payload: payload });
-    setTimeout(() => {
-      notifyDispatch({ type: "RESET" });
-    }, 5000);
-  };
+  const notify = useNotify();
 
-  const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [newBlogFormVisible, setNewBlogFormVisible] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      blogService
-        .getAll()
-        .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)));
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user) {
+  //     blogService
+  //       .getAll()
+  //       .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)));
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedUser");
@@ -63,83 +55,6 @@ const App = () => {
     } catch {
       notify({ message: "something went wrong", status: "error" });
     }
-  };
-
-  const addBlog = async (blogObject) => {
-    try {
-      const blog = await blogService.create(blogObject);
-      blogService.getAll().then((blogs) => setBlogs(blogs));
-      notify({
-        message: `a new blog ${blog.title} by ${blog.author} added`,
-        status: "success",
-      });
-    } catch (error) {
-      notify({ message: "Something went wrong", status: "error" });
-    } finally {
-      setNewBlogFormVisible(false);
-    }
-  };
-
-  const newBlogForm = () => {
-    const hideWhenVisible = { display: newBlogFormVisible ? "none" : "" };
-    const showWhenVisible = { display: newBlogFormVisible ? "" : "none" };
-    return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setNewBlogFormVisible(true)}>new form</button>
-        </div>
-        <div style={showWhenVisible}>
-          <NewBlogForm createBlog={addBlog} />
-          <button onClick={() => setNewBlogFormVisible(false)}>cancel</button>
-        </div>
-      </div>
-    );
-  };
-
-  const updateBlog = async (updatedBlog) => {
-    try {
-      await blogService.edit(updatedBlog);
-      setBlogs(
-        blogs
-          .map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
-          .sort((a, b) => b.likes - a.likes),
-      );
-      notify({
-        message: `Blog ${updatedBlog.title} was successfully updated`,
-        status: "success",
-      });
-    } catch (e) {
-      notify({ message: "Couldn't update blog", status: "error" });
-    }
-  };
-
-  const deleteBlog = async (blogToDelete) => {
-    try {
-      await blogService.deleteBlog(blogToDelete.id);
-      setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
-      notify({
-        message: `${blogToDelete.title} successfully deleted`,
-        status: "success",
-      });
-    } catch (error) {
-      notify({ message: "Couldn't delete blog", status: "error" });
-    }
-  };
-
-  const blogsComp = () => {
-    return (
-      <div>
-        {blogs.map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            editBlog={updateBlog}
-            deleteBlog={deleteBlog}
-            signedInUser={user}
-          />
-        ))}
-      </div>
-    );
   };
 
   const loginForm = () => (
@@ -182,8 +97,8 @@ const App = () => {
             {user.name} is logged in
             <button onClick={() => handleLogout()}>logout</button>
           </p>
-          {newBlogForm()}
-          {blogsComp()}
+          <NewBlogForm />
+          <Blog user={user}/>
         </div>
       )}
     </div>

@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import blogService from "../services/blogs";
+import { useEffect, useState } from "react";
 // import PropTypes from "prop-types";
 
-const Blog = ({ blog, editBlog, deleteBlog, signedInUser }) => {
+const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
   const [visible, setVisible] = useState(false);
   const [hideOrView, setHideOrView] = useState("view");
   const [blogObject, setBlogObject] = useState(blog);
@@ -65,11 +67,62 @@ const Blog = ({ blog, editBlog, deleteBlog, signedInUser }) => {
   );
 };
 
-// Blog.propTypes = {
-//   blog: PropTypes.object.isRequired,
-//   signedInUser: PropTypes.object.isRequired,
-//   editBlog: PropTypes.func.isRequired,
-//   deleteBlog: PropTypes.func.isRequired,
-// };
+const updateBlog = async (updatedBlog) => {
+  try {
+    await blogService.edit(updatedBlog);
+    setBlogs(
+      blogs
+        .map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
+        .sort((a, b) => b.likes - a.likes),
+    );
+    notify({
+      message: `Blog ${updatedBlog.title} was successfully updated`,
+      status: "success",
+    });
+  } catch (e) {
+    notify({ message: "Couldn't update blog", status: "error" });
+  }
+};
+
+const deleteBlog = async (blogToDelete) => {
+  try {
+    await blogService.deleteBlog(blogToDelete.id);
+    setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
+    notify({
+      message: `${blogToDelete.title} successfully deleted`,
+      status: "success",
+    });
+  } catch (error) {
+    notify({ message: "Couldn't delete blog", status: "error" });
+  }
+};
+
+const Blog = ({ user }) => {
+  const result = useQuery({
+    queryKey: ["blogs", user],
+    queryFn: blogService.getAll,
+    refetchOnWindowFocus: false
+  });
+
+  if (result.isPending) {
+    return <div>Fetching data..</div>;
+  }
+
+  const blogs = result.data;
+
+  return (
+    <div>
+      {blogs.map((blog) => (
+        <Blogs
+          key={blog.id}
+          blog={blog}
+          editBlog={updateBlog}
+          deleteBlog={deleteBlog}
+          signedInUser={user}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default Blog;

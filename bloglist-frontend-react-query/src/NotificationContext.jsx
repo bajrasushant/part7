@@ -2,12 +2,12 @@ import { createContext, useContext, useReducer } from "react";
 
 const notificationReducer = (state, action) => {
   switch (action.type) {
-  case "SET":
-    return action.payload;
-  case "RESET":
-    return "";
-  default:
-    return "";
+    case "SET":
+      return action.payload;
+    case "RESET":
+      return "";
+    default:
+      return "";
   }
 };
 
@@ -34,5 +34,6 @@ export const useNotifyDispatch = () => {
   const notifyAndDispatch = useContext(NotificationContext);
   return notifyAndDispatch[1];
 };
+
 
 export default NotificationContext;
