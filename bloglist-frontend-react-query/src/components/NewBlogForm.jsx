@@ -93,7 +93,9 @@ const NewBlogForm = () => {
   const newBlogMutation = useMutation({
     mutationFn: blogService.create,
     onSuccess: (newBlog) => {
-      queryClient.invalidateQueries(["blogs"]);
+      // queryClient.invalidateQueries(["blogs"]);
+      const blogs = queryClient.getQueryData(["blogs"]);
+      queryClient.setQueryData(["blogs"], blogs.concat(newBlog));
       notify({
         message: `a new blog ${newBlog.title} by ${newBlog.author} added`,
         status: "success",

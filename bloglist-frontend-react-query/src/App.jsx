@@ -13,14 +13,6 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // useEffect(() => {
-  //   if (user) {
-  //     blogService
-  //       .getAll()
-  //       .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)));
-  //   }
-  // }, [user]);
-
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedUser");
     if (loggedUserJSON) {

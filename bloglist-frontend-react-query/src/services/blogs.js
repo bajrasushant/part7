@@ -14,8 +14,8 @@ const create = async (newObject) => {
   return response.data;
 };
 
-const edit = async (editObject) => {
-  await axios.put(`${baseUrl}/${editObject.id}`, editObject, config);
+const edit = async (editedObject) => {
+  await axios.put(`${baseUrl}/${editedObject.id}`, editedObject, config);
 };
 
 const deleteBlog = async (blogToDeleteId) => {

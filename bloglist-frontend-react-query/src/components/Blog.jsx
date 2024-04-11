@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import blogService from "../services/blogs";
 import { useEffect, useState } from "react";
+import { useNotify } from "../hooks";
 // import PropTypes from "prop-types";
 
 const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
@@ -8,6 +9,7 @@ const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
   const [hideOrView, setHideOrView] = useState("view");
   const [blogObject, setBlogObject] = useState(blog);
 
+  const notify = useNotify();
   const showWhenVisible = { display: visible ? "" : "none" };
 
   const toggleVisibility = () => {
@@ -20,13 +22,21 @@ const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
       ...blog,
       likes: blog.likes + 1,
     };
-    editBlog(updatedBlog);
+    editBlog.mutate(updatedBlog);
     setBlogObject(updatedBlog);
+    notify({
+      message: `Blog ${updatedBlog.title} was successfully updated`,
+      status: "success",
+    });
   };
 
   const removeBlog = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      deleteBlog(blog);
+      deleteBlog.mutate(blog.id);
+      notify({
+        message: `Blog ${blog.title} successfully deleted`,
+        status: "success",
+      });
     }
   };
 
@@ -67,48 +77,43 @@ const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
   );
 };
 
-const updateBlog = async (updatedBlog) => {
-  try {
-    await blogService.edit(updatedBlog);
-    setBlogs(
-      blogs
-        .map((blog) => (blog.id !== updatedBlog.id ? blog : updatedBlog))
-        .sort((a, b) => b.likes - a.likes),
-    );
-    notify({
-      message: `Blog ${updatedBlog.title} was successfully updated`,
-      status: "success",
-    });
-  } catch (e) {
-    notify({ message: "Couldn't update blog", status: "error" });
-  }
-};
-
-const deleteBlog = async (blogToDelete) => {
-  try {
-    await blogService.deleteBlog(blogToDelete.id);
-    setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id));
-    notify({
-      message: `${blogToDelete.title} successfully deleted`,
-      status: "success",
-    });
-  } catch (error) {
-    notify({ message: "Couldn't delete blog", status: "error" });
-  }
-};
-
 const Blog = ({ user }) => {
+  const queryClient = useQueryClient();
+  const notify = useNotify();
   const result = useQuery({
-    queryKey: ["blogs", user],
+    queryKey: ["blogs"],
     queryFn: blogService.getAll,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+  });
+
+  const updateBlog = useMutation({
+    mutationFn: blogService.edit,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["blogs"]);
+    },
+    onError: (res) => {
+      console.error(res.response.data.error);
+      notify({ message: "Couldn't update blog", status: "error" });
+    },
+  });
+
+  const deleteBlog = useMutation({
+    mutationFn: blogService.deleteBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["blogs"]);
+    },
+
+    onError: (res) => {
+      console.error(res.response.data.error);
+      notify({ message: "Couldn't delete blog", status: "error" });
+    },
   });
 
   if (result.isPending) {
     return <div>Fetching data..</div>;
   }
 
-  const blogs = result.data;
+  const blogs = [...result.data].sort((a, b) => b.likes - a.likes);
 
   return (
     <div>
