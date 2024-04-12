@@ -9,7 +9,6 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action) {
-      console.log(action.payload);
       window.localStorage.setItem("loggedUser", JSON.stringify(action.payload));
       blogService.setToken(action.payload.token);
       return action.payload;

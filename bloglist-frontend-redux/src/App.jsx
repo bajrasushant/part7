@@ -10,14 +10,26 @@ import { setNotification } from "./reducers/notificationReducer";
 import { setUser } from "./reducers/userReducer";
 import { createBlog, initializeBlogs } from "./reducers/blogReducer";
 
+import { Route, Routes, useMatch } from "react-router-dom";
+import { getAllUsers } from "./reducers/allUserReducer";
+import UserList from "./components/UserList";
+import UserDetail from "./components/UserDetail";
+
 const App = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const allUsers = useSelector((state) => state.allUsers);
   const [newBlogFormVisible, setNewBlogFormVisible] = useState(false);
+
+  const match = useMatch("users/:id");
+
+  const userById = (id) => allUsers.find((user) => user.id === id);
+  const userDetails = match ? userById(match.params.id) : null;
 
   useEffect(() => {
     if (user) {
       dispatch(initializeBlogs());
+      dispatch(getAllUsers());
     }
   }, [user]);
 
@@ -82,14 +94,23 @@ const App = () => {
       {user !== null && (
         <div>
           <h1>blogs</h1>
-          <p>
-            {user.name} is logged in
-            <button onClick={() => handleLogout()}>logout</button>
-          </p>
-          {newBlogForm()}
-          <Blog signedInUser={user} />
+          <p>{user.name} is logged in</p>
+          <button onClick={() => handleLogout()}>logout</button>
         </div>
       )}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div>
+              {newBlogForm()}
+              <Blog signedInUser={user} />
+            </div>
+          }
+        />
+        <Route path="/users" element={<UserList />} />
+        <Route path="/users/:id" element={<UserDetail user={userDetails} />} />
+      </Routes>
     </div>
   );
 };
