@@ -136,7 +136,7 @@ describe("Blog app", function () {
           .eq(1)
           .should("contain", "The title with the second most likes");
       });
-      it.only("title with the second most likes when liked most ranks first", function () {
+      it("title with the second most likes when liked most ranks first", function () {
         cy.contains("The title with the most likes")
           .parent()
           .as("theFirst")
