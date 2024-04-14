@@ -7,7 +7,11 @@ const Notification = () => {
     display: notification ? "block" : "none",
   };
 
-  return <div className={notification.status}>{notification.message}</div>;
+  return (
+    <div style={style} className={notification.status}>
+      {notification.message}
+    </div>
+  );
 };
 
 export default Notification;

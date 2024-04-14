@@ -1,36 +1,8 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setNotification } from "../reducers/notificationReducer";
-import { removeBlogs, likeBlogs } from "../reducers/blogReducer";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 // import PropTypes from "prop-types";
 
-const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
-  const [visible, setVisible] = useState(false);
-  const [hideOrView, setHideOrView] = useState("view");
-  const [blogObject, setBlogObject] = useState(blog);
-
-  const showWhenVisible = { display: visible ? "" : "none" };
-
-  const toggleVisibility = () => {
-    setVisible(!visible);
-    setHideOrView(hideOrView === "view" ? "hide" : "view");
-  };
-
-  const incrementLike = () => {
-    const updatedBlog = {
-      ...blog,
-      likes: blog.likes + 1,
-    };
-    editBlog(updatedBlog);
-    setBlogObject(updatedBlog);
-  };
-
-  const removeBlog = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      deleteBlog(blog);
-    }
-  };
-
+const Blogs = ({ blog }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -43,78 +15,24 @@ const Blogs = ({ blog, editBlog, deleteBlog, signedInUser }) => {
     <div className="blog_list" style={blogStyle}>
       <div className="blog">
         <div className="title-and-author">
-          {blog.title} {blog.author}
-        </div>
-        <button onClick={toggleVisibility}>{hideOrView}</button>
-        <div className="blog-extra-details" style={showWhenVisible}>
-          <a className="blogUrl" href={`${blog.url}`}>
-            {blog.url}
-          </a>
-          <div className="blogLikes">
-            likes {blogObject.likes}
-            <button className="like-button" onClick={incrementLike}>
-              like
-            </button>
-          </div>
-          <div className="blogUsername">{blog.user?.username}</div>
-          {signedInUser.username === blog.user?.username && (
-            <button className="delete-button" onClick={removeBlog}>
-              remove
-            </button>
-          )}
+          <Link to={`/blogs/${blog.id}`}>
+            {blog.title} {blog.author}
+          </Link>
         </div>
       </div>
     </div>
   );
 };
 
-const Blog = ({ signedInUser }) => {
-  const dispatch = useDispatch();
+const Blog = () => {
   const blogs = useSelector((state) => state.blogs);
 
-  const updateBlog = async (updatedBlog) => {
-    try {
-      dispatch(likeBlogs(updatedBlog));
-      dispatch(
-        setNotification({
-          message: `Blog ${updatedBlog.title} was successfully updated`,
-          status: "success",
-        }),
-      );
-    } catch (e) {
-      dispatch(
-        setNotification({ message: "Couldn't update blog", status: "error" }),
-      );
-    }
-  };
-
-  const deleteBlog = async (blogToDelete) => {
-    try {
-      dispatch(removeBlogs(blogToDelete.id));
-      dispatch(
-        setNotification({
-          message: `${blogToDelete.title} successfully deleted`,
-          status: "success",
-        }),
-      );
-    } catch (error) {
-      dispatch(
-        setNotification({ message: "Couldn't delete blog", status: "error" }),
-      );
-    }
-  };
   return (
     <div>
       {[...blogs]
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <Blogs
-            key={blog.id}
-            blog={blog}
-            signedInUser={signedInUser}
-            editBlog={updateBlog}
-            deleteBlog={deleteBlog}
-          />
+          <Blogs key={blog.id} blog={blog} />
         ))}
     </div>
   );
@@ -126,5 +44,7 @@ const Blog = ({ signedInUser }) => {
 //   editBlog: PropTypes.func.isRequired,
 //   deleteBlog: PropTypes.func.isRequired,
 // };
-
+//
+//
+// <button onClick={toggleVisibility}>{hideOrView}</button>
 export default Blog;

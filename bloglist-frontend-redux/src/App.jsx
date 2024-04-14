@@ -14,17 +14,24 @@ import { Route, Routes, useMatch } from "react-router-dom";
 import { getAllUsers } from "./reducers/allUserReducer";
 import UserList from "./components/UserList";
 import UserDetail from "./components/UserDetail";
+import BlogDetail from "./components/BlogDetail";
+import Navigation from "./components/Navigation";
 
 const App = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const allUsers = useSelector((state) => state.allUsers);
+  const blogs = useSelector((state) => state.blogs);
   const [newBlogFormVisible, setNewBlogFormVisible] = useState(false);
 
-  const match = useMatch("users/:id");
+  const userMatch = useMatch("users/:id");
+  const blogMatch = useMatch("blogs/:id");
 
   const userById = (id) => allUsers.find((user) => user.id === id);
-  const userDetails = match ? userById(match.params.id) : null;
+  const userDetails = userMatch ? userById(userMatch.params.id) : null;
+
+  const blogById = (id) => blogs.find((blog) => blog.id === id);
+  const blogDetails = blogMatch ? blogById(blogMatch.params.id) : null;
 
   useEffect(() => {
     if (user) {
@@ -40,18 +47,6 @@ const App = () => {
       dispatch(setUser(user));
     }
   }, []);
-
-  const handleLogout = () => {
-    try {
-      window.localStorage.removeItem("loggedUser");
-      window.location.reload();
-      dispatch(setUser(null));
-    } catch {
-      dispatch(
-        setNotification({ message: "something went wrong", status: "error" }),
-      );
-    }
-  };
 
   const addBlog = (blogObject) => {
     try {
@@ -93,9 +88,8 @@ const App = () => {
       {user === null && <LoginForm />}
       {user !== null && (
         <div>
+          <Navigation user={user}/>
           <h1>blogs</h1>
-          <p>{user.name} is logged in</p>
-          <button onClick={() => handleLogout()}>logout</button>
         </div>
       )}
       <Routes>
@@ -110,6 +104,10 @@ const App = () => {
         />
         <Route path="/users" element={<UserList />} />
         <Route path="/users/:id" element={<UserDetail user={userDetails} />} />
+        <Route
+          path="/blogs/:id"
+          element={<BlogDetail blog={blogDetails} signedInUser={user} />}
+        />
       </Routes>
     </div>
   );
