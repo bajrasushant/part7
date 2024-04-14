@@ -1,4 +1,5 @@
 import axios from "axios";
+
 const baseUrl = "/api/blogs";
 
 let token = null;
@@ -7,11 +8,6 @@ let config;
 const getAll = async () => {
   const request = await axios.get(baseUrl, config);
   return request.data;
-};
-
-const create = async (newObject) => {
-  const response = await axios.post(baseUrl, newObject, config);
-  return response.data;
 };
 
 const edit = async (editObject) => {
@@ -23,6 +19,15 @@ const deleteBlog = async (blogToDeleteId) => {
   return response.data;
 };
 
+const addComment = async (blogId, comment) => {
+  await axios.post(`${baseUrl}/${blogId}/comments`, comment, config);
+};
+
+const create = async (newObject) => {
+  const response = await axios.post(baseUrl, newObject, config);
+  return response.data;
+};
+
 const setToken = (newToken) => {
   token = `Bearer ${newToken}`;
   config = {
@@ -30,4 +35,4 @@ const setToken = (newToken) => {
   };
 };
 
-export default { getAll, setToken, create, edit, deleteBlog };
+export default { getAll, setToken, create, edit, deleteBlog, addComment };

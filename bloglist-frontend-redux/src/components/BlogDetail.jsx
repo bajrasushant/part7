@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { likeBlogs, removeBlogs } from "../reducers/blogReducer";
+import { addComments, likeBlogs, removeBlogs } from "../reducers/blogReducer";
 import { setNotification } from "../reducers/notificationReducer";
 
 const BlogDetail = ({ blog, signedInUser }) => {
@@ -19,6 +19,15 @@ const BlogDetail = ({ blog, signedInUser }) => {
       dispatch(
         setNotification({ message: "Couldn't update blog", status: "error" }),
       );
+    }
+  };
+
+  const addNewComment = (event) => {
+    event.preventDefault();
+    const comment = event.target.comment.value;
+    if (comment) {
+      dispatch(addComments(blog.id, { comment }));
+      event.target.reset();
     }
   };
 
@@ -52,11 +61,12 @@ const BlogDetail = ({ blog, signedInUser }) => {
     }
   };
 
-  console.log(blog);
   if (!blog) return null;
   return (
     <div className="blog-extra-details">
-      <h2>{blog.title} {blog.author}</h2>
+      <h2>
+        {blog.title} {blog.author}
+      </h2>
       <a className="blogUrl" href={`${blog.url}`}>
         {blog.url}
       </a>
@@ -67,15 +77,28 @@ const BlogDetail = ({ blog, signedInUser }) => {
         </button>
       </div>
       <div className="blogUsername">added by {blog.user?.username}</div>
-      {signedInUser.username === blog.user?.username && (
+      {/*   {signedInUser.username === blog.user?.username && (
         <button className="delete-button" onClick={removeBlog}>
           remove
         </button>
       )}
+      */}
+      <h3>comments</h3>
+      <form onSubmit={addNewComment}>
+        <input id="comment" type="text" name="comment" />
+        <button type="submit">add comment</button>
+      </form>
+      {blog.comments && blog.comments.length > 0 ? (
+        <ul>
+          {blog.comments.map((comment, i) => (
+            <li key={i}>{comment}</li>
+          ))}
+        </ul>
+      ) : (
+        <div>None</div>
+      )}
     </div>
-
   );
-
 };
 
 export default BlogDetail;

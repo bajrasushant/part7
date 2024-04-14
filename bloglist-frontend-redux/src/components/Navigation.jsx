@@ -10,7 +10,6 @@ const Navigation = ({ user }) => {
     try {
       window.localStorage.removeItem("loggedUser");
       window.location.reload();
-      dispatch(setUser(null));
     } catch {
       dispatch(
         setNotification({ message: "something went wrong", status: "error" }),
