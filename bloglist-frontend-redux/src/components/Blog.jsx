@@ -1,23 +1,29 @@
+import { Divider, ListItemButton } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 // import PropTypes from "prop-types";
 
 const Blogs = ({ blog }) => {
   const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: "solid",
-    borderWidth: 1,
-    marginBottom: 5,
+    // paddingTop: 10,
+    // paddingLeft: 2,
+    // border: "solid",
+    // borderWidth: 1,
+    // marginBottom: 5,
   };
 
   return (
     <div className="blog_list" style={blogStyle}>
       <div className="blog">
         <div className="title-and-author">
-          <Link to={`/blogs/${blog.id}`}>
+          <ListItemButton
+            style={{ textDecoration: "none" }}
+            component={Link}
+            to={`/blogs/${blog.id}`}
+          >
             {blog.title} {blog.author}
-          </Link>
+          </ListItemButton>
+          <Divider />
         </div>
       </div>
     </div>

@@ -1,3 +1,11 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -7,27 +15,37 @@ const UserList = () => {
   return (
     <div>
       <h2>Users</h2>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>blogs created</th>
-          </tr>
-        </thead>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Users</TableCell>
+              <TableCell>blogs created</TableCell>
+            </TableRow>
+          </TableHead>
 
-        <tbody>
-          {[...users]
-            .sort((a, b) => b.blogs.length - a.blogs.length)
-            .map((user) => (
-              <tr key={user.id}>
-                <td>
-                  <Link to={`/users/${user.id}`}>{user.name}</Link>
-                </td>
-                <td>{user.blogs.length}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+          <TableBody>
+            {[...users]
+              .sort((a, b) => b.blogs.length - a.blogs.length)
+              .map((user) => (
+                <TableRow
+                  key={user.id}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell>
+                    <Link
+                      style={{ textDecoration: "none", color: "inherit" }}
+                      to={`/users/${user.id}`}
+                    >
+                      {user.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{user.blogs.length}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };

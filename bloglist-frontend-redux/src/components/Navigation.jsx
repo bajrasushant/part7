@@ -1,8 +1,8 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { setUser } from "../reducers/userReducer";
 import { setNotification } from "../reducers/notificationReducer";
 import { Link } from "react-router-dom";
+import { List, Button, ListItem } from "@mui/material";
 
 const Navigation = ({ user }) => {
   const dispatch = useDispatch();
@@ -17,33 +17,43 @@ const Navigation = ({ user }) => {
     }
   };
 
-  const style = {
-    backgroundColor: "grey",
-  };
-
   return (
-    <nav style={style}>
-      <ul
-        style={{
-          listStyleType: "none",
-          margin: 0,
-          padding: 0,
-        }}
-      >
-        <li style={{ display:"inline", marginRight: "10px" }}>
-          <Link to="/">blogs</Link>
-        </li>
-        <li style={{ display:"inline", marginRight: "10px" }}>
-          <Link to="/users">users</Link>
-        </li>
-        <li style={{ display:"inline", marginRight: "10px" }}>
-          {user.name} is logged in
-        </li>
-        <li style={{ display:"inline", marginRight: "10px" }}>
-          <button onClick={() => handleLogout()}>logout</button>
-        </li>
-      </ul>
-    </nav>
+    <List
+      sx={{
+        width: "100%",
+        bgcolor: "text.disabled",
+        display: "flex",
+        justifyContent: "center",
+        flexWrap: "nowrap", // Default to no wrap
+        "@media (max-width: 600px)": {
+          flexWrap: "wrap", // Apply wrap on screens smaller than 600px
+        },
+      }}
+      component="nav"
+    >
+      <ListItem>
+        <Link to="/" style={{ textDecoration: "none" }}>
+          Blogs
+        </Link>
+      </ListItem>
+      <ListItem>
+        <Link to="/users" style={{ textDecoration: "none" }}>
+          Users
+        </Link>
+      </ListItem>
+      <ListItem>
+        {user.name} is logged in
+      </ListItem>
+      <ListItem>
+        <Button
+          color="secondary"
+          variant="contained"
+          onClick={() => handleLogout()}
+        >
+          logout
+        </Button>
+      </ListItem>
+    </List>
   );
 };
 

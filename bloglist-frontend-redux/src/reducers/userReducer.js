@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import loginService from "../services/login";
 import blogService from "../services/blogs";
+import { setNotification } from "./notificationReducer";
 
 const initialState = null;
 
@@ -18,8 +19,14 @@ const userSlice = createSlice({
 
 export const loginUser = (userDetails) => {
   return async (dispatch) => {
-    const user = await loginService.login(userDetails);
-    dispatch(setUser(user));
+    try {
+      const user = await loginService.login(userDetails);
+      dispatch(setUser(user));
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
   };
 };
 
